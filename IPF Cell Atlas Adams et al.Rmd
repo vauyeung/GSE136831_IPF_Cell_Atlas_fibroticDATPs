@@ -1,6 +1,10 @@
 ---
 title: "IPF Cell Atlas: Read-in"
-output: html_notebook
+output:
+  github_document:
+    toc: true
+  html_notebook:
+    toc: true
 ---
 
 This version uses the Imran integration that has developmental cells built-in.
@@ -22,7 +26,7 @@ metadata <- as.data.frame(metadata)
 rownames(metadata) <- metadata$CellBarcode_Identity
 
 features <- read_tsv(paste0(original.dir,'GSE136831_AllCells.GeneIDs.txt.gz'))
-cells <- read_tsv(paste0(original.dir,'GSE136831_AllCells.cellBarcodes.txt.gz', col_names = F))
+cells <- read_tsv(paste0(original.dir,'GSE136831_AllCells.cellBarcodes.txt.gz'), col_names = F)
 
 counts <- Matrix::readMM(paste0(original.dir,'GSE136831_RawCounts_Sparse.mtx.gz'))
 rownames(counts) <- features$HGNC_EnsemblAlt_GeneID
@@ -36,7 +40,8 @@ rm(counts,cells,features,metadata)
 gc()
 ```
 
-# Standard processing
+# Standard preprocessing
+## Filter overall dataset
 ```{r}
 ipfatlas.cells[['percent.mt']] <- PercentageFeatureSet(ipfatlas.cells, pattern='^MT-')
 VlnPlot(ipfatlas.cells, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0)
@@ -44,6 +49,8 @@ VlnPlot(ipfatlas.cells, features = c("nFeature_RNA", "nCount_RNA", "percent.mt")
 ```{r}
 ipfatlas.cells <- subset(ipfatlas.cells, subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 10)
 ```
+
+## Proceed with epithelium
 ```{r}
 ipfatlas.epi.cells <- subset(ipfatlas.cells, subset=CellType_Category=='Epithelial')
 ```
@@ -66,7 +73,9 @@ FeaturePlot(ipfatlas.epi.cells, features=c('CLDN4','KRT8','LGALS3','GDF15'))
 ```
 
 
-## Assume that annotations are accurate
+# Dot plots using mouse equivalent fibrotic DATP genes
+Accepts the published annotations as accurate.
+
 ```{r}
 ipfatlas.epi.ipf.cells <- subset(ipfatlas.epi.cells, subset=Disease_Identity=='IPF')
 ipfatlas.epi.ctrl.cells <- subset(ipfatlas.epi.cells, subset=Disease_Identity=='Control')
@@ -92,7 +101,7 @@ DotPlot(ipfatlas.epi.ipf.cells, features=c('KRT7','KRT8','LGALS3','TP63','KRT17'
 ```
 Collapse the non-basal airway cells
 ```{r}
-Idents(ipfatlas.epi.ipf.cells) <- ipfatlas.epi.ipf.cells[['Manuscript_Identity']]
+Idents(ipfatlas.epi.ipf.cells) <- 'Manuscript_Identity'
 ipfatlas.epi.ipf.cells <- RenameIdents(ipfatlas.epi.ipf.cells,
                                        `Ionocyte`='Other Airway',
                                        `Goblet`='Other Airway',
@@ -106,12 +115,4 @@ DotPlot(ipfatlas.epi.ipf.cells, features=c('KRT7','KRT8','LGALS3','TP63','KRT17'
 ```
 
 
-
-# Internal mouse data
-
-MNN clustering focused on aT2 cells including DATPs, and Imran's P7 and P14 cells.
-
-```{r}
-load('D:/Users/vauyeung/Box Sync/lab/Datasets/210927_A00269_0565_AH3VL2DSX2/IRE1Bleo.Vel.withDev.MNN.AT2.cells.Robj')
-```
 
