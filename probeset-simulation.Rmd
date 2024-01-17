@@ -59,3 +59,128 @@ DimPlot(ipfatlas.xen1panel.cells, group.by='Subclass_Cell_Identity')
 DimPlot(ipfatlas.xen1panel.cells, group.by='Subject_Identity')
 DimPlot(ipfatlas.xen1panel.cells, group.by='Disease_Identity')
 ```
+
+## Subset epithelium
+```{r}
+ipfatlas.xen1panel.epi.cells <- subset(ipfatlas.xen1panel.cells, subset=CellType_Category=='Epithelial')
+```
+
+```{r}
+ipfatlas.xen1panel.epi.cells <- NormalizeData(ipfatlas.xen1panel.epi.cells)
+ipfatlas.xen1panel.epi.cells <- FindVariableFeatures(ipfatlas.xen1panel.epi.cells)
+ipfatlas.xen1panel.epi.cells <- ScaleData(ipfatlas.xen1panel.epi.cells, features=rownames(ipfatlas.xen1panel.epi.cells))
+ipfatlas.xen1panel.epi.cells <- RunPCA(ipfatlas.xen1panel.epi.cells)
+ipfatlas.xen1panel.epi.cells <- RunUMAP(ipfatlas.xen1panel.epi.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.xen1panel.epi.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.xen1panel.epi.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.xen1panel.epi.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.xen1panel.epi.cells, group.by='Disease_Identity')
+```
+Check fibrotic DATP expression
+```{r}
+FeaturePlot(ipfatlas.xen1panel.epi.cells, features=c('CLDN4','KRT7','LGALS3','GDF15'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+FeaturePlot(ipfatlas.xen1panel.epi.cells, features=c('KRT17','KRT5','TP63','PDPN'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+```
+
+## Subset fibroblasts
+```{r}
+ipfatlas.xen1panel.fib.cells <- subset(ipfatlas.xen1panel.cells, subset=CellType_Category=='Stromal')
+```
+
+```{r}
+ipfatlas.xen1panel.fib.cells <- NormalizeData(ipfatlas.xen1panel.fib.cells)
+ipfatlas.xen1panel.fib.cells <- FindVariableFeatures(ipfatlas.xen1panel.fib.cells)
+ipfatlas.xen1panel.fib.cells <- ScaleData(ipfatlas.xen1panel.fib.cells, features=rownames(ipfatlas.xen1panel.fib.cells))
+ipfatlas.xen1panel.fib.cells <- RunPCA(ipfatlas.xen1panel.fib.cells)
+ipfatlas.xen1panel.fib.cells <- RunUMAP(ipfatlas.xen1panel.fib.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.xen1panel.fib.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.xen1panel.fib.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.xen1panel.fib.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.xen1panel.fib.cells, group.by='Disease_Identity')
+```
+Check fibroblast subtype markers
+```{r}
+FeaturePlot(ipfatlas.xen1panel.fib.cells, features=c('COL1A1','CTHRC1','INMT','SCN7A'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+FeaturePlot(ipfatlas.xen1panel.fib.cells, features=c('PLA2G2A','PI16','MFAP5','WNT5A'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+```
+
+# Simulate Cosmx 1k panel
+The "Universal" gene panel
+```{r}
+cosmx.1Kpanel.genes <- read.csv('CosMx Human Universal Panel Gene Target List_sept23.csv', header = TRUE)$Gene
+```
+```{r}
+ipfatlas.cosmx1k.cells <- subset(ipfatlas.cells, features=cosmx.1Kpanel.genes)
+```
+Some genes in the Cosmx panel are not in the IPF dataset. Many of these genes are listed with a "/" suggesting that the probe cannot distinguish these isoforms. For simplicity I am not going to clean up the gene list. So actual list is a bit shorter. These are the missing genes:
+```{r}
+setdiff(cosmx.1Kpanel.genes, rownames(ipfatlas.cells))
+```
+
+## Standard clustering
+```{r}
+ipfatlas.cosmx1k.cells <- NormalizeData(ipfatlas.cosmx1k.cells)
+ipfatlas.cosmx1k.cells <- FindVariableFeatures(ipfatlas.cosmx1k.cells)
+ipfatlas.cosmx1k.cells <- ScaleData(ipfatlas.cosmx1k.cells, features=rownames(ipfatlas.cosmx1k.cells))
+ipfatlas.cosmx1k.cells <- RunPCA(ipfatlas.cosmx1k.cells)
+ipfatlas.cosmx1k.cells <- RunUMAP(ipfatlas.cosmx1k.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.cosmx1k.cells, group.by='CellType_Category')
+DimPlot(ipfatlas.cosmx1k.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.cosmx1k.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.cosmx1k.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.cosmx1k.cells, group.by='Disease_Identity')
+```
+
+## Subset epithelium
+```{r}
+ipfatlas.cosmx1k.epi.cells <- subset(ipfatlas.cosmx1k.cells, subset=CellType_Category=='Epithelial')
+```
+
+```{r}
+ipfatlas.cosmx1k.epi.cells <- NormalizeData(ipfatlas.cosmx1k.epi.cells)
+ipfatlas.cosmx1k.epi.cells <- FindVariableFeatures(ipfatlas.cosmx1k.epi.cells)
+ipfatlas.cosmx1k.epi.cells <- ScaleData(ipfatlas.cosmx1k.epi.cells, features=rownames(ipfatlas.cosmx1k.epi.cells))
+ipfatlas.cosmx1k.epi.cells <- RunPCA(ipfatlas.cosmx1k.epi.cells)
+ipfatlas.cosmx1k.epi.cells <- RunUMAP(ipfatlas.cosmx1k.epi.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.cosmx1k.epi.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.cosmx1k.epi.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.cosmx1k.epi.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.cosmx1k.epi.cells, group.by='Disease_Identity')
+```
+Check fibrotic DATP expression
+```{r}
+FeaturePlot(ipfatlas.cosmx1k.epi.cells, features=c('CLDN4','KRT7','LGALS3','GDF15'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+FeaturePlot(ipfatlas.cosmx1k.epi.cells, features=c('KRT17','KRT5','TP63','PDPN'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+```
+
+## Subset fibroblasts
+```{r}
+ipfatlas.cosmx1k.fib.cells <- subset(ipfatlas.cosmx1k.cells, subset=CellType_Category=='Stromal')
+```
+
+```{r}
+ipfatlas.cosmx1k.fib.cells <- NormalizeData(ipfatlas.cosmx1k.fib.cells)
+ipfatlas.cosmx1k.fib.cells <- FindVariableFeatures(ipfatlas.cosmx1k.fib.cells)
+ipfatlas.cosmx1k.fib.cells <- ScaleData(ipfatlas.cosmx1k.fib.cells, features=rownames(ipfatlas.cosmx1k.fib.cells))
+ipfatlas.cosmx1k.fib.cells <- RunPCA(ipfatlas.cosmx1k.fib.cells)
+ipfatlas.cosmx1k.fib.cells <- RunUMAP(ipfatlas.cosmx1k.fib.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.cosmx1k.fib.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.cosmx1k.fib.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.cosmx1k.fib.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.cosmx1k.fib.cells, group.by='Disease_Identity')
+```
+Check fibroblast subtype markers
+```{r}
+FeaturePlot(ipfatlas.cosmx1k.fib.cells, features=c('COL1A1','CTHRC1','INMT','SCN7A'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+FeaturePlot(ipfatlas.cosmx1k.fib.cells, features=c('PLA2G2A','PI16','MFAP5','WNT5A'), order=T, max.cutoff = 'q99', min.cutoff='q1')
+```
