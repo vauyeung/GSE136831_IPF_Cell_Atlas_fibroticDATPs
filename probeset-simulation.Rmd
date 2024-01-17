@@ -1,0 +1,60 @@
+---
+title: "Simulation of restricted probesets for spatial transcriptomics"
+output:
+  github_document:
+    toc: true
+  html_notebook:
+    toc: true
+---
+
+For probe-based spatial transcriptomics, the number and identity of genes that have probesets is limited. This script queries how this restricted gene set might perform in cell identification by routine clustering.
+
+# Environment
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(Seurat)
+library(SeuratWrappers)
+library(monocle3)
+library(RColorBrewer)
+spectral.colors <- colorRampPalette(rev(brewer.pal(9,'Spectral')))
+```
+
+## Read in IPF Cell Atlas (GSE136831)
+This notebook depends on the output of the read-in script. for convenience, can bypass script by loading stored Seurat object directly.
+```{r}
+# This is more reliable
+#source(knitr::purl("IPF-Cell-Atlas__read-in.Rmd", quiet=TRUE))
+knitr::knit("IPF-Cell-Atlas__read-in.Rmd", output = tempfile())
+```
+```{r, eval=FALSE}
+# faster
+load('ipfatlas.cells_fromd8d92b9.Robj')
+```
+
+# Simulate Xenium lung panel 1
+This is the panel used in the initial trial runs with the genomics CoLabs.
+```{r}
+xenium.panel1.genes <- read.csv('Xenium_panel_order_08_10_23.csv', header = TRUE)$Gene
+```
+```{r}
+ipfatlas.xen1panel.cells <- subset(ipfatlas.cells, features=xenium.panel1.genes)
+```
+Some genes in the xenium panel are not in the IPF dataset. Not sure why the dataset in GSE136831 is missing these genes. so actual list is a bit shorter. These are the missing genes:
+```{r}
+setdiff(xenium.panel1.genes, rownames(ipfatlas.xen1panel.cells))
+```
+
+## Standard clustering
+```{r}
+ipfatlas.xen1panel.cells <- NormalizeData(ipfatlas.xen1panel.cells)
+ipfatlas.xen1panel.cells <- FindVariableFeatures(ipfatlas.xen1panel.cells)
+ipfatlas.xen1panel.cells <- ScaleData(ipfatlas.xen1panel.cells, features=rownames(ipfatlas.xen1panel.cells))
+ipfatlas.xen1panel.cells <- RunPCA(ipfatlas.xen1panel.cells)
+ipfatlas.xen1panel.cells <- RunUMAP(ipfatlas.xen1panel.cells, dims=1:30)
+```
+```{r}
+DimPlot(ipfatlas.xen1panel.cells, group.by='Manuscript_Identity')
+DimPlot(ipfatlas.xen1panel.cells, group.by='Subclass_Cell_Identity')
+DimPlot(ipfatlas.xen1panel.cells, group.by='Subject_Identity')
+DimPlot(ipfatlas.xen1panel.cells, group.by='Disease_Identity')
+```
