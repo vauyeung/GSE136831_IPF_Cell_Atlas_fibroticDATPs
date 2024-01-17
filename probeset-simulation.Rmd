@@ -53,6 +53,7 @@ ipfatlas.xen1panel.cells <- RunPCA(ipfatlas.xen1panel.cells)
 ipfatlas.xen1panel.cells <- RunUMAP(ipfatlas.xen1panel.cells, dims=1:30)
 ```
 ```{r}
+DimPlot(ipfatlas.xen1panel.cells, group.by='CellType_Category')
 DimPlot(ipfatlas.xen1panel.cells, group.by='Manuscript_Identity')
 DimPlot(ipfatlas.xen1panel.cells, group.by='Subclass_Cell_Identity')
 DimPlot(ipfatlas.xen1panel.cells, group.by='Subject_Identity')
